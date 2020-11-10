@@ -26,9 +26,14 @@
     ]
   },
   "dependencies": {
+    "@artsy/next-palette": "^1.0.0",
+    "@artsy/palette": "^13.17.0",
+    "cookie": "^0.4.1",
     "next": "latest",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "styled-components": "^4",
+    "swr": "^0.3.8"
   },
   "devDependencies": {
     "@testing-library/react": "^10.0.1",

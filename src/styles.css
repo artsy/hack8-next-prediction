@@ -1,0 +1,4 @@
+/* CSS Reset and stuff to make page fill height no matter what */
+
+html, body, div#__next { height: 100%; }
+body { margin: 0; }
