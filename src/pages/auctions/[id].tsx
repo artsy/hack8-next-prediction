@@ -1,10 +1,47 @@
 import React from 'react'
 import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import { graphql } from 'react-relay'
+import { useQuery } from 'relay-hooks'
+import { Box, Flex, Text } from '@artsy/palette'
+import { Layout } from 'components/Layout'
+
+const auctionDataQuery = graphql`
+  query Id_auctionDataQuery($saleId: ID!) {
+    sale(id: $saleId) {
+      lots {
+        id
+      }
+    }
+  }
+`
+
+const Debug = ({ value }): JSX.Element => (
+  <Flex borderRadius={4} style={{ overflow: 'scroll' }} px={1} bg="black10">
+    <Text height="300px" as="pre" fontFamily="courier">
+      {JSON.stringify(value, null, 2)}
+    </Text>
+  </Flex>
+)
 
 export default function Auction(props) {
-  console.log(props)
+  console.warn('FFFF ' + process.env.NEXT_PUBLIC_CAUSALITY_TEMP_JWT)
+  if (!props?.sale?.internalID) return null
+  console.log({ props })
+  const { error, props: auctionData } = useQuery(auctionDataQuery, {
+    saleId: props.sale.internalID,
+  })
+  if (error) return <div>{error.message}</div>
+
+  if (!auctionData) return <div>Loading</div>
+  // console.log({ auctionData })
+  // debugger
   return (
-    <h1>test</h1>
+    <Layout>
+      <Box p={4}>
+        <h1>test</h1>
+        <Debug value={{ props }} />
+      </Box>
+    </Layout>
   )
 }
 
@@ -101,9 +138,9 @@ export const getStaticProps = async ({ params: { id } }) => {
       // notFound: !res.status(200)
     }
   } catch (error) {
-    console.error(error)
+    console.error({ error })
     return {
-      notFound: true
+      notFound: true,
     }
   }
   // const auction = await res.json()
