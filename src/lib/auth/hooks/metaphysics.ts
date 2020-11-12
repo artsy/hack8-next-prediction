@@ -1,11 +1,11 @@
 import useSWR from 'swr'
 import { useUser } from './user'
 
-const metaphysicsFetcher = async (
+export const metaphysicsFetcher = async (
   query: string,
   // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   variableJSON: string = '{}',
-  accessToken: string
+  accessToken?: string
 ) => {
   const url = `${process.env.NEXT_PUBLIC_METAPHYSICS_URL}/v2`
   const variables = JSON.parse(variableJSON)
@@ -20,6 +20,7 @@ const metaphysicsFetcher = async (
   })
 
   if (!response.ok) {
+    console.log(response)
     throw new Error(response.statusText || response.status.toString())
   }
 
