@@ -20,7 +20,6 @@ export const metaphysicsFetcher = async (
   })
 
   if (!response.ok) {
-    console.log(response)
     throw new Error(response.statusText || response.status.toString())
   }
 

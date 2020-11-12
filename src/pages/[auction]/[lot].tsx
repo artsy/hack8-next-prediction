@@ -1,18 +1,68 @@
-import React from 'react'
-import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import React, { useEffect, useState } from "react"
+import { useRouter } from "next/router"
+import Link from "next/link"
+import styled from 'styled-components'
+import { BorderBox, Button, color, Column, GridColumns, Link as HyperLink, Text } from "@artsy/palette"
 
-export default function Auction(props) {
-  console.log(props)
+import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import { CurrentLotCard, LotInfo, LotsList, LotView, Header } from "components/Auction"
+
+// These IS all for the sake of testing
+import { generateDummyData } from "components/Auction/testData"
+const amt = 30
+const lotIdx = 1
+const fakeLots: Array<Lot> = generateDummyData(amt)
+
+import { Lot, Sale } from "components/Types"
+
+const Auction: React.FC<{sale: Sale}> = ({ sale }) => {
+  const lots = sale?.fakeLots || []
+  const currentLot = lots[0]
+  const router = useRouter()
+  let active = router.query.lot === currentLot?.internalID
+
+  const [ selectedLot, setSelectedLot ] = useState(currentLot)
+
+  useEffect(() => {
+    const newLot = lots.find((lot) => router.query.lot === lot.internalID)
+    if (newLot) setSelectedLot(newLot)
+  }, [ router.query.lot ])
+
   return (
-    <h1>test</h1>
+    <GridColumns position="relative" gridColumnGap={0} height="100%">
+      <Column span={3} display="flex" flexDirection="column" overflow="hidden">
+        <Header title={sale?.name} count={lots.length} completed={lotIdx} />
+        <CurrentLotCard currentLot={currentLot} isActive={active} saleSlug={sale?.slug} />
+        <LotsList lots={lots} saleSlug={sale?.slug} />
+      </Column>
+
+      <Column span={6} borderX={`1px solid ${color('black10')}`} p={3} display="flex" alignItems="center">
+        <LotView lot={selectedLot} />
+      </Column>
+
+      <Column span={3}>
+        <LotInfo lot={selectedLot} />
+        <BorderBox flexDirection='column' alignItems="center" borderRadius={0} borderX="none">
+          <Button disabled>REGISTRATION CLOSED</Button>
+          <Text variant="small" color="black60" mt={1}>
+            Already registered for this sale? <Link href="/login"><LinkContent>Log In</LinkContent></Link>
+          </Text>
+        </BorderBox>
+      </Column>
+
+    </GridColumns>
   )
 }
 
-export const getStaticProps = async ({ params: { id } }) => {
+const LinkContent = styled(HyperLink)`
+  cursor: pointer;
+`
+
+export const getStaticProps = async ({ params: { auction, lot } }) => {
   try {
     const res = await metaphysicsFetcher(`
       query GetSaleQuery {
-        sale(id: "${id}") {
+        sale(id: "${auction}") {
           internalID
           slug
           name
@@ -88,9 +138,10 @@ export const getStaticProps = async ({ params: { id } }) => {
         }
       }
     `)
+    // TODO: delete this once connection is working right
     return {
       props: {
-        sale: res.sale,
+        sale: { ...res.sale, fakeLots },
 
         // auction,
       },
@@ -123,3 +174,5 @@ export async function getStaticPaths() {
   // { fallback: false } means other routes should 404.
   return { paths: [], fallback: true }
 }
+
+export default Auction
