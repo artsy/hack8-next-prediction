@@ -33,7 +33,7 @@ export const CurrentLotCard: React.FC<Props> = ({ currentLot, isActive, saleSlug
         <GavelIcon fill={ !isActive ? "white100": "purple100" }/>
       </Flex>
       { !isActive &&
-        <Link as={`/${saleSlug}/${currentLot.internalID}`} href="/[auction]/[lot]">
+        <Link href={`/auction/${saleSlug}?lot=${currentLot.internalID}`}>
         <Button block width="100%" variant="primaryWhite" mt={1}>GO BACK TO LIVE LOT</Button>
         </Link>
       }

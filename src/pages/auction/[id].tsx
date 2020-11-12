@@ -4,7 +4,7 @@ import Link from "next/link"
 import styled from 'styled-components'
 import { BorderBox, Button, color, Column, GridColumns, Link as HyperLink, Text } from "@artsy/palette"
 
-import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import { metaphysicsFetcher, useMetaphysics } from 'lib/auth/hooks/metaphysics'
 import { CurrentLotCard, LotInfo, LotsList, LotView, Header } from "components/Auction"
 
 // These IS all for the sake of testing
@@ -16,6 +16,10 @@ const fakeLots: Array<Lot> = generateDummyData(amt)
 import { Lot, Sale } from "components/Types"
 
 const Auction: React.FC<{sale: Sale}> = ({ sale }) => {
+
+  // const res = useMetaphysics(graphqlQuery, { SaleId: sale?.internalID })
+  // console.log(res)
+
   const lots = sale?.fakeLots || []
   const currentLot = lots[0]
   const router = useRouter()
@@ -58,86 +62,9 @@ const LinkContent = styled(HyperLink)`
   cursor: pointer;
 `
 
-export const getStaticProps = async ({ params: { auction, lot } }) => {
+export const getStaticProps = async ({ params: { id } }) => {
   try {
-    const res = await metaphysicsFetcher(`
-      query GetSaleQuery {
-        sale(id: "${auction}") {
-          internalID
-          slug
-          name
-          description
-          currency
-          startAt
-          liveStartAt
-          endAt
-          isClosed
-          registrationEndsAt
-          isLiveOpen
-          buyersPremium {
-            amount
-            percent
-          }
-          saleArtworksConnection {
-            edges {
-              node {
-                internalID
-                slug
-                lotLabel
-                increments {
-                  cents
-                  display
-                }
-                lowEstimate {
-                  cents
-                }
-                highEstimate {
-                  cents
-                }
-                symbol
-                currency
-                estimate
-                reserveStatus
-                reserve {
-                  cents
-                }
-                artwork {
-                  id
-                  title
-                  date
-                  medium
-                  category
-                  description
-                  dimensions {
-                    in
-                    cm
-                  }
-                  editionOf
-                  partner(shallow: true) {
-                    id
-                    name
-                    profile {
-                      icon {
-                        url
-                      }
-                    }
-                  }
-                  artist(shallow: true) {
-                    name
-                    id
-                  }
-                  image {
-                    width
-                    height
-                    url(version: "large")
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `)
+    const res = await metaphysicsFetcher(graphqlQuery, JSON.stringify({ SaleId: id }))
     // TODO: delete this once connection is working right
     return {
       props: {
@@ -176,3 +103,82 @@ export async function getStaticPaths() {
 }
 
 export default Auction
+
+const graphqlQuery = `
+  query GetSaleQuery($SaleId: String!) {
+    sale(id: $SaleId) {
+      internalID
+      slug
+      name
+      description
+      currency
+      startAt
+      liveStartAt
+      endAt
+      isClosed
+      registrationEndsAt
+      isLiveOpen
+      buyersPremium {
+        amount
+        percent
+      }
+      saleArtworksConnection(all: true) {
+        edges {
+          node {
+            internalID
+            slug
+            lotLabel
+            increments {
+              cents
+              display
+            }
+            lowEstimate {
+              cents
+            }
+            highEstimate {
+              cents
+            }
+            symbol
+            currency
+            estimate
+            reserveStatus
+            reserve {
+              cents
+            }
+            artwork {
+              id
+              title
+              date
+              medium
+              category
+              description
+              dimensions {
+                in
+                cm
+              }
+              editionOf
+              partner(shallow: true) {
+                id
+                name
+                profile {
+                  icon {
+                    url
+                  }
+                }
+              }
+              artist(shallow: true) {
+                name
+                id
+              }
+              image {
+                width
+                height
+                url(version: "large")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`

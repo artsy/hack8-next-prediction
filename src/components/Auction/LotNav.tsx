@@ -15,7 +15,7 @@ export const LotNav: React.FC<Props> = ({ lot, saleSlug }) => {
   const router = useRouter()
   let active = router.query.lot === lot.internalID
   return (
-    <Link as={`/${saleSlug}/${lot.internalID}`} href="/[auction]/[lot]">
+    <Link href={`/auction/${saleSlug}?lot=${lot.internalID}`}>
       <FlexLink px={3} py={1} bg={ active ? "#fdefd1" : "white100" } flexDirection="row">
         <Image
           height="50px"
