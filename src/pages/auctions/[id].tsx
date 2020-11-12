@@ -1,8 +1,28 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { color, Column, Flex, GridColumns, Spinner } from '@artsy/palette'
-
+import { color, Column, Flex, GridColumns, Spinner, Text } from '@artsy/palette'
 import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import { graphql } from 'react-relay'
+import { useQuery } from 'relay-hooks'
+
+const auctionDataQuery = graphql`
+  query Id_auctionDataQuery($saleId: ID!) {
+    sale(id: $saleId) {
+      lots {
+        id
+      }
+    }
+  }
+`
+
+const Debug = ({ value }): JSX.Element => (
+  <Flex borderRadius={4} style={{ overflow: 'scroll' }} px={1} bg="black10">
+    <Text height="300px" as="pre" fontFamily="courier">
+      {JSON.stringify(value, null, 2)}
+    </Text>
+  </Flex>
+)
+
 import {
   BidRegistration,
   CurrentLotCard,
@@ -31,9 +51,14 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
     if (!selectedLot || !router.query.lot) setSelectedLot(currentLot)
   }, [router.query.lot, lots])
 
+  const { error, props: auctionData } = useQuery(auctionDataQuery, {
+    saleId: sale.internalID,
+  })
+  if (error) return <div>{error.message}</div>
+
   // If the page is not yet generated, this will be displayed
   // initially until getStaticProps() finishes running
-  if (router.isFallback) {
+  if (router.isFallback || !auctionData) {
     return (
       <Flex height="100%" justifyContent="center" alignItems="center">
         <Spinner size="large" />
@@ -100,7 +125,7 @@ export const getStaticProps = async ({ params: { id } }) => {
       // notFound: !res.status(200)
     }
   } catch (error) {
-    console.error(error)
+    console.error({ error })
     return {
       notFound: true,
     }

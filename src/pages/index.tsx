@@ -61,7 +61,7 @@ export const getStaticProps = async () => {
 
 const query = `
   query {
-    auctions: sales(is_auction: true, sort: CREATED_AT_ASC, size: 7) {
+    auctions: sales(is_auction: true, sort: CREATED_AT_ASC, size: 20) {
       slug: id
       name
       isLiveOpen: is_live_open

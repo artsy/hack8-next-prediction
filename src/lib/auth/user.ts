@@ -10,10 +10,12 @@ export interface UserSessionData {
 export async function findUser({ username, password, otp }) {
   const accessToken = await getGravityAccessToken({ username, password, otp })
   const userProfile = await getUserProfile(accessToken)
+  // const causalityJwt = await getCausalityJwt(accessToken)
 
   return {
     ...userProfile,
     accessToken,
+    // causalityJwt,
   }
 }
 
