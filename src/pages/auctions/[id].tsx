@@ -1,59 +1,94 @@
-import React, { useEffect, useState } from "react"
-import { useRouter } from "next/router"
-import Link from "next/link"
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
 import styled from 'styled-components'
-import { BorderBox, Button, color, Column, GridColumns, Link as HyperLink, Text } from "@artsy/palette"
+import {
+  BorderBox,
+  Button,
+  color,
+  Column,
+  GridColumns,
+  Link as HyperLink,
+  Text,
+} from '@artsy/palette'
 
-import { metaphysicsFetcher, useMetaphysics } from 'lib/auth/hooks/metaphysics'
-import { CurrentLotCard, LotInfo, LotsList, LotView, Header } from "components/Auction"
+import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import {
+  CurrentLotCard,
+  LotInfo,
+  LotsList,
+  LotView,
+  Header,
+} from 'components/Auction'
 
 // These IS all for the sake of testing
-import { generateDummyData } from "components/Auction/testData"
+import { generateDummyData } from 'components/Auction/testData'
 const amt = 30
 const lotIdx = 1
-const fakeLots: Array<Lot> = generateDummyData(amt)
+// const fakeLots: Array<Lot> = generateDummyData(amt)
 
-import { Lot, Sale } from "components/Types"
+import { Lot, Sale } from 'components/Types'
 
-const Auction: React.FC<{sale: Sale}> = ({ sale }) => {
-
-  // const res = useMetaphysics(graphqlQuery, { SaleId: sale?.internalID })
-  // console.log(res)
-
-  const lots = sale?.fakeLots || []
+const Auction: React.FC<{ sale: Sale }> = (props) => {
+  console.log(!!props)
+  if (!props) return <h1>Loading...</h1>
+  const { sale } = props
+  // debugger
+  const lots =
+    sale?.saleArtworksConnection?.edges?.map(({ node }) => node) || []
   const currentLot = lots[0]
   const router = useRouter()
-  let active = router.query.lot === currentLot?.internalID
+  const active = router.query.lot === currentLot?.internalID
 
-  const [ selectedLot, setSelectedLot ] = useState(currentLot)
+  console.log({ lots })
+  const [selectedLot, setSelectedLot] = useState(currentLot)
 
   useEffect(() => {
     const newLot = lots.find((lot) => router.query.lot === lot.internalID)
     if (newLot) setSelectedLot(newLot)
-  }, [ router.query.lot ])
+  }, [router.query.lot])
 
   return (
     <GridColumns position="relative" gridColumnGap={0} height="100%">
       <Column span={3} display="flex" flexDirection="column" overflow="hidden">
         <Header title={sale?.name} count={lots.length} completed={lotIdx} />
-        <CurrentLotCard currentLot={currentLot} isActive={active} saleSlug={sale?.slug} />
+        {currentLot && (
+          <CurrentLotCard
+            currentLot={currentLot}
+            isActive={active}
+            saleSlug={sale?.slug}
+          />
+        )}
         <LotsList lots={lots} saleSlug={sale?.slug} />
       </Column>
 
-      <Column span={6} borderX={`1px solid ${color('black10')}`} p={3} display="flex" alignItems="center">
+      <Column
+        span={6}
+        borderX={`1px solid ${color('black10')}`}
+        p={3}
+        display="flex"
+        alignItems="center"
+      >
         <LotView lot={selectedLot} />
       </Column>
 
       <Column span={3}>
         <LotInfo lot={selectedLot} />
-        <BorderBox flexDirection='column' alignItems="center" borderRadius={0} borderX="none">
+        <BorderBox
+          flexDirection="column"
+          alignItems="center"
+          borderRadius={0}
+          borderX="none"
+        >
           <Button disabled>REGISTRATION CLOSED</Button>
           <Text variant="small" color="black60" mt={1}>
-            Already registered for this sale? <Link href="/login"><LinkContent>Log In</LinkContent></Link>
+            Already registered for this sale?{' '}
+            <Link href="/login">
+              <LinkContent>Log In</LinkContent>
+            </Link>
           </Text>
         </BorderBox>
       </Column>
-
     </GridColumns>
   )
 }
@@ -63,12 +98,18 @@ const LinkContent = styled(HyperLink)`
 `
 
 export const getStaticProps = async ({ params: { id } }) => {
+  console.log('GSP')
   try {
-    const res = await metaphysicsFetcher(graphqlQuery, JSON.stringify({ SaleId: id }))
+    const res = await metaphysicsFetcher({
+      query: graphqlQuery,
+      variables: { SaleId: id },
+      xappToken: process.env.NEXT_PUBLIC_ARTSY_XAPP_TOKEN,
+    })
+    console.log(res.sale)
     // TODO: delete this once connection is working right
     return {
       props: {
-        sale: { ...res.sale, fakeLots },
+        sale: { ...res.sale },
 
         // auction,
       },
@@ -81,7 +122,7 @@ export const getStaticProps = async ({ params: { id } }) => {
   } catch (error) {
     console.error(error)
     return {
-      notFound: true
+      notFound: true,
     }
   }
   // const auction = await res.json()

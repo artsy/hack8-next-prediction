@@ -26,12 +26,16 @@ export interface Lot {
   bidCount: number
 }
 
+interface EdgeLike<T> {
+  node: T
+}
+
 export interface Sale {
   internalID: string
   slug: string
   name: string
   saleArtworksConnection: {
-    edges: Array<Lot>
+    edges: Array<EdgeLike<Lot>>
   }
   fakeLots?: Array<Lot>
 }

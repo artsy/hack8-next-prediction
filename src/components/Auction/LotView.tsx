@@ -1,29 +1,43 @@
-import React, { useEffect, useState } from "react"
-import { ArrowRightIcon, Button, CloseIcon, Flex, Image, Link, ResponsiveBox, Text } from "@artsy/palette"
+import React, { useEffect, useState } from 'react'
+import {
+  ArrowRightIcon,
+  Button,
+  CloseIcon,
+  Flex,
+  Image,
+  Link,
+  ResponsiveBox,
+  Text,
+} from '@artsy/palette'
 import styled from 'styled-components'
 
-import { LotDetails } from "./LotInfo"
+import { LotDetails } from './LotInfo'
 
-import { Lot } from "../Types"
+import { Lot } from '../Types'
 interface Props {
   lot: Lot
 }
 
 export const LotView: React.FC<Props> = ({ lot }) => {
   if (!lot) return null
-  const [ artworkSrc, setArtworkSrc ] = useState("")
-  const [ mainView, setMainView ] = useState(true)
+  const [artworkSrc, setArtworkSrc] = useState('')
+  const [mainView, setMainView] = useState(true)
   useEffect(() => {
     setArtworkSrc(lot.artwork.image.url)
     setMainView(true)
-  }, [ lot ])
+  }, [lot])
 
   const toggleMainView = () => {
     setMainView(!mainView)
   }
   return (
-    <Flex alignItems="center" flexDirection="column" flex={1} alignSelf={mainView ? "auto" : "baseline"}>
-      { mainView &&
+    <Flex
+      alignItems="center"
+      flexDirection="column"
+      flex={1}
+      alignSelf={mainView ? 'auto' : 'baseline'}
+    >
+      {mainView && (
         <>
           <ResponsiveBox
             aspectWidth={500}
@@ -39,10 +53,17 @@ export const LotView: React.FC<Props> = ({ lot }) => {
               lazyLoad
             />
           </ResponsiveBox>
-          <Button my={3} variant="secondaryOutline" size="medium" onClick={toggleMainView}>LOT INFORMATION</Button>
+          <Button
+            my={3}
+            variant="secondaryOutline"
+            size="medium"
+            onClick={toggleMainView}
+          >
+            LOT INFORMATION
+          </Button>
         </>
-      }
-      { !mainView &&
+      )}
+      {!mainView && (
         <>
           <Flex justifyContent="space-between" width="100%">
             <Flex alignItems="center">
@@ -56,17 +77,30 @@ export const LotView: React.FC<Props> = ({ lot }) => {
                 preventRightClick
                 lazyLoad
               />
-              <LotDetails lot={lot} condensed={false} includeEstimates={false} />
+              <LotDetails
+                lot={lot}
+                condensed={false}
+                includeEstimates={false}
+              />
             </Flex>
-            <Link href="#" underlineBehavior="none" onClick={toggleMainView}><CloseIcon width="24px" height="39px" /></Link>
+            <Link href="#" underlineBehavior="none" onClick={toggleMainView}>
+              <CloseIcon width="24px" height="39px" />
+            </Link>
           </Flex>
-          <StyledLink target="_blank" href="https://www.artsy.net/" underlineBehavior="none" hoverColor="purple100" mt={30}>
-            <Text variant="mediumText">VIEW {lot.artist.name.toUpperCase()} ON ARTSY</Text>
-            <ArrowRightIcon/>
+          <StyledLink
+            target="_blank"
+            href="https://www.artsy.net/"
+            underlineBehavior="none"
+            hoverColor="purple100"
+            mt={30}
+          >
+            <Text variant="mediumText">
+              VIEW {lot?.artist?.name.toUpperCase()} ON ARTSY
+            </Text>
+            <ArrowRightIcon />
           </StyledLink>
         </>
-
-      }
+      )}
     </Flex>
   )
 }
