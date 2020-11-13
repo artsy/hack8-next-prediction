@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const AuctionLink: React.FC<Props> = ({ auction }) => {
-  const { slug, name, status, coverImage } = auction
+  const { slug, name, coverImage } = auction
   return (
     <Link href={`/auctions/${slug}`}>
       <FlexLink
@@ -19,18 +19,21 @@ export const AuctionLink: React.FC<Props> = ({ auction }) => {
         justifyContent="space-between"
       >
         <Flex alignItems="center">
-          <Image
-            mr={2}
-            width="50px"
-            height="50px"
-            src={coverImage.url}
-            alt="Please make sure you describe the image"
-          />
+          <Box height="50px" width="50px" bg="black10" mr={2}>
+            {coverImage && (
+              <Image
+                width="50px"
+                height="50px"
+                src={coverImage.url}
+                alt="Please make sure you describe the image"
+              />
+            )}
+          </Box>
           <Box>
             <Text variant="subitle" mb={0.5}>
               {name}
             </Text>
-            <Text>{status}</Text>
+            <Text>Live Bidding Open</Text>
           </Box>
         </Flex>
         <ChevronIcon fill="black60" height="21px" width="21px" />

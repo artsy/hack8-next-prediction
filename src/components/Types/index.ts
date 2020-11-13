@@ -3,8 +3,8 @@
 export interface Auction {
   slug: string
   name: string
-  status: string
-  coverImage: {
+  isLiveOpen: boolean
+  coverImage?: {
     url: string
   }
 }
