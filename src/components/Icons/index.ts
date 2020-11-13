@@ -1,2 +1,2 @@
-export * from "./GavelIcon"
-export * from "./PaddleIcon"
+export * from './GavelIcon'
+export * from './PaddleIcon'
