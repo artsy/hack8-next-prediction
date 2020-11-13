@@ -1,5 +1,4 @@
 import {
-  authMiddleware,
   RelayNetworkLayer,
   urlMiddleware,
 } from 'react-relay-network-modern/node8'

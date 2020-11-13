@@ -1,12 +1,10 @@
 import {
   RelayNetworkLayer,
   cacheMiddleware,
-  authMiddleware,
   urlMiddleware,
 } from 'react-relay-network-modern/node8'
 import RelaySSR from 'react-relay-network-modern-ssr/node8/client'
 import { Environment, RecordSource, Store } from 'relay-runtime'
-import { fetchJwt } from './fetchJwt'
 
 const source = new RecordSource()
 const store = new Store(source)
