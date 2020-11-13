@@ -1,98 +1,97 @@
-import React from 'react'
-import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { color, Column, Flex, GridColumns, Spinner } from '@artsy/palette'
 
-export default function Auction(props) {
-  console.log(props)
+import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import {
+  BidRegistration,
+  CurrentLotCard,
+  LotInfo,
+  LotsList,
+  LotView,
+  Header,
+} from 'components/Auction'
+
+// These IS all for the sake of testing
+const lotIdx = 1
+
+import { Sale } from 'components/Types'
+
+const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
+  const router = useRouter()
+
+  const lots =
+    sale?.saleArtworksConnection?.edges?.map(({ node }) => node) || []
+  const currentLot = lots[0] || null
+  const [selectedLot, setSelectedLot] = useState(currentLot)
+
+  useEffect(() => {
+    const newLot = lots.find((lot) => router.query.lot === lot.internalID)
+    if (newLot) setSelectedLot(newLot)
+    if (!selectedLot || !router.query.lot) setSelectedLot(currentLot)
+  }, [router.query.lot, lots])
+
+  // If the page is not yet generated, this will be displayed
+  // initially until getStaticProps() finishes running
+  if (router.isFallback) {
+    return (
+      <Flex height="100%" justifyContent="center" alignItems="center">
+        <Spinner size="large" />
+      </Flex>
+    )
+  }
+
+  const isActive =
+    router.query.lot === currentLot?.internalID || !router.query.lot
+
   return (
-    <h1>test</h1>
+    <GridColumns position="relative" gridColumnGap={0} height="100%">
+      <Column span={3} display="flex" flexDirection="column" overflow="hidden">
+        <Header title={sale?.name} count={lots.length} completed={lotIdx} />
+        {currentLot && (
+          <CurrentLotCard
+            currentLot={currentLot}
+            isActive={isActive}
+            saleSlug={sale?.slug}
+          />
+        )}
+        <LotsList lots={lots} saleSlug={sale?.slug} />
+      </Column>
+
+      <Column
+        span={6}
+        borderX={`1px solid ${color('black10')}`}
+        p={3}
+        display="flex"
+        alignItems="center"
+      >
+        {selectedLot && (
+          <LotView buyersPremium={sale?.buyersPremium} lot={selectedLot} />
+        )}
+      </Column>
+
+      <Column span={3}>
+        <LotInfo lot={selectedLot} buyersPremium={sale?.buyersPremium} />
+        <BidRegistration
+          currency={selectedLot?.currency}
+          hasEnded={sale?.isClosed}
+        />
+      </Column>
+    </GridColumns>
   )
 }
 
 export const getStaticProps = async ({ params: { id } }) => {
   try {
-    const res = await metaphysicsFetcher(`
-      query GetSaleQuery {
-        sale(id: "${id}") {
-          internalID
-          slug
-          name
-          description
-          currency
-          startAt
-          liveStartAt
-          endAt
-          isClosed
-          registrationEndsAt
-          isLiveOpen
-          buyersPremium {
-            amount
-            percent
-          }
-          saleArtworksConnection {
-            edges {
-              node {
-                internalID
-                slug
-                lotLabel
-                increments {
-                  cents
-                  display
-                }
-                lowEstimate {
-                  cents
-                }
-                highEstimate {
-                  cents
-                }
-                symbol
-                currency
-                estimate
-                reserveStatus
-                reserve {
-                  cents
-                }
-                artwork {
-                  id
-                  title
-                  date
-                  medium
-                  category
-                  description
-                  dimensions {
-                    in
-                    cm
-                  }
-                  editionOf
-                  partner(shallow: true) {
-                    id
-                    name
-                    profile {
-                      icon {
-                        url
-                      }
-                    }
-                  }
-                  artist(shallow: true) {
-                    name
-                    id
-                  }
-                  image {
-                    width
-                    height
-                    url(version: "large")
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `)
+    const res = await metaphysicsFetcher({
+      query: graphqlQuery,
+      variables: { SaleId: id },
+      xappToken: process.env.NEXT_PUBLIC_ARTSY_XAPP_TOKEN,
+    })
+
     return {
       props: {
         sale: res.sale,
-
-        // auction,
       },
       // Next.js will attempt to re-generate the page:
       // - When a request comes in
@@ -103,7 +102,7 @@ export const getStaticProps = async ({ params: { id } }) => {
   } catch (error) {
     console.error(error)
     return {
-      notFound: true
+      notFound: true,
     }
   }
   // const auction = await res.json()
@@ -123,3 +122,84 @@ export async function getStaticPaths() {
   // { fallback: false } means other routes should 404.
   return { paths: [], fallback: true }
 }
+
+export default Auction
+
+const graphqlQuery = `
+  query GetSaleQuery($SaleId: String!) {
+    sale(id: $SaleId) {
+      internalID
+      slug
+      name
+      description
+      currency
+      startAt
+      liveStartAt
+      endAt
+      isClosed
+      registrationEndsAt
+      isLiveOpen
+      buyersPremium {
+        amount
+        percent
+      }
+      saleArtworksConnection(all: true) {
+        edges {
+          node {
+            internalID
+            slug
+            lotLabel
+            increments {
+              cents
+              display
+            }
+            lowEstimate {
+              cents
+            }
+            highEstimate {
+              cents
+            }
+            symbol
+            currency
+            estimate
+            reserveStatus
+            reserve {
+              cents
+            }
+            artwork {
+              id
+              title
+              date
+              medium
+              category
+              description
+              dimensions {
+                in
+                cm
+              }
+              editionOf
+              partner(shallow: true) {
+                id
+                name
+                profile {
+                  icon {
+                    url
+                  }
+                }
+              }
+              artist(shallow: true) {
+                name
+                id
+              }
+              image {
+                width
+                height
+                url(version: "large")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
