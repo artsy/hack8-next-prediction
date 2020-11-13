@@ -36,9 +36,6 @@ export const Header = () => {
           alignItems="center"
           justifyContent="space-between"
         >
-          <Box mr={2}>
-            <NavLink href="/dashboard">Dashboard</NavLink>
-          </Box>
           {/*
               <Box mr={2}>
                 <NavLink href="/gravity">Gravity example</NavLink>

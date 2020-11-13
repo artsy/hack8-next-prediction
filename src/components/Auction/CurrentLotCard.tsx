@@ -63,4 +63,7 @@ export const CurrentLotCard: React.FC<Props> = ({
 
 const ImageNC = styled(Image)`
   flex: none;
+  img {
+    object-fit: cover;
+  }
 `
