@@ -14,7 +14,7 @@ export const metaphysicsFetcher = async ({
   xappToken?: string
 }) => {
   const url = `${process.env.NEXT_PUBLIC_METAPHYSICS_URL}/v2`
-  console.log({ variables, xappToken })
+  // console.log({ variables, xappToken })
 
   const headers = {
     'Content-Type': 'application/json',
@@ -38,11 +38,9 @@ export const metaphysicsFetcher = async ({
   const json = await response.json()
   const { data, errors } = json // TODO: errors
   if (errors) {
-    console.error('oh no ...')
     // console.error(errors)
     throw new Error(JSON.stringify(errors))
   }
-  console.log('returning data')
   return data
 }
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, Button, Flex, Image, Text } from '@artsy/palette'
 import Link from 'next/link'
+import styled from 'styled-components'
 
 import { GavelIcon } from '../Icons'
 
@@ -35,7 +36,7 @@ export const CurrentLotCard: React.FC<Props> = ({
         position="relative"
         justifyContent="space-between"
       >
-        <Image
+        <ImageNC
           height="50px"
           width="50px"
           lazyLoad
@@ -43,14 +44,14 @@ export const CurrentLotCard: React.FC<Props> = ({
         />
         <Flex flexDirection="column" mx={3}>
           <Text variant="mediumText" color="black60">
-            {currentLot?.artist?.name}
+            {currentLot.artwork.artist?.name}
           </Text>
-          <Text variant="title">{currentLot.currentBid}</Text>
+          <Text variant="title">{currentLot.increments[0].display}</Text>
         </Flex>
         <GavelIcon fill={!isActive ? 'white100' : 'purple100'} />
       </Flex>
       {!isActive && (
-        <Link href={`/auction/${saleSlug}?lot=${currentLot.internalID}`}>
+        <Link href={`/auctions/${saleSlug}?lot=${currentLot.internalID}`}>
           <Button block width="100%" variant="primaryWhite" mt={1}>
             GO BACK TO LIVE LOT
           </Button>
@@ -59,3 +60,7 @@ export const CurrentLotCard: React.FC<Props> = ({
     </Box>
   )
 }
+
+const ImageNC = styled(Image)`
+  flex: none;
+`

@@ -13,12 +13,13 @@ import styled from 'styled-components'
 
 import { LotDetails } from './LotInfo'
 
-import { Lot } from '../Types'
+import { Lot, Sale } from '../Types'
 interface Props {
   lot: Lot
+  buyersPremium: Sale['buyersPremium']
 }
 
-export const LotView: React.FC<Props> = ({ lot }) => {
+export const LotView: React.FC<Props> = ({ lot, buyersPremium }) => {
   if (!lot) return null
   const [artworkSrc, setArtworkSrc] = useState('')
   const [mainView, setMainView] = useState(true)
@@ -46,6 +47,7 @@ export const LotView: React.FC<Props> = ({ lot }) => {
             bg="black5"
           >
             <Image
+              height="100%"
               src="https://picsum.photos/seed/hello/700/400"
               srcSet={artworkSrc}
               alt="Please make sure you describe the image"
@@ -79,7 +81,8 @@ export const LotView: React.FC<Props> = ({ lot }) => {
               />
               <LotDetails
                 lot={lot}
-                condensed={false}
+                buyersPremium={buyersPremium}
+                /*condensed={false}*/
                 includeEstimates={false}
               />
             </Flex>
@@ -95,7 +98,7 @@ export const LotView: React.FC<Props> = ({ lot }) => {
             mt={30}
           >
             <Text variant="mediumText">
-              VIEW {lot?.artist?.name.toUpperCase()} ON ARTSY
+              VIEW {lot.artwork.artist?.name.toUpperCase()} ON ARTSY
             </Text>
             <ArrowRightIcon />
           </StyledLink>

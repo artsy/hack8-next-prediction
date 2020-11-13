@@ -1,20 +1,10 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-import styled from 'styled-components'
-import {
-  BorderBox,
-  Button,
-  color,
-  Column,
-  Flex,
-  GridColumns,
-  Link as HyperLink,
-  Text,
-} from '@artsy/palette'
+import { color, Column, Flex, GridColumns, Spinner } from '@artsy/palette'
 
 import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
 import {
+  BidRegistration,
   CurrentLotCard,
   LotInfo,
   LotsList,
@@ -27,19 +17,18 @@ const lotIdx = 1
 
 import { Sale } from 'components/Types'
 
-const Auction: React.FC<{ sale: Sale }> = (props) => {
+const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
   const router = useRouter()
 
-  const { sale } = props
   const lots =
     sale?.saleArtworksConnection?.edges?.map(({ node }) => node) || []
   const currentLot = lots[0] || null
   const [selectedLot, setSelectedLot] = useState(currentLot)
 
   useEffect(() => {
-    console.log('useeffect')
     const newLot = lots.find((lot) => router.query.lot === lot.internalID)
     if (newLot) setSelectedLot(newLot)
+    if (!selectedLot || !router.query.lot) setSelectedLot(currentLot)
   }, [router.query.lot, lots])
 
   // If the page is not yet generated, this will be displayed
@@ -47,12 +36,13 @@ const Auction: React.FC<{ sale: Sale }> = (props) => {
   if (router.isFallback) {
     return (
       <Flex height="100%" justifyContent="center" alignItems="center">
-        <pre>Loading...</pre>
+        <Spinner size="large" />
       </Flex>
     )
   }
 
-  const isActive = router.query.lot === currentLot?.internalID
+  const isActive =
+    router.query.lot === currentLot?.internalID || !router.query.lot
 
   return (
     <GridColumns position="relative" gridColumnGap={0} height="100%">
@@ -75,49 +65,33 @@ const Auction: React.FC<{ sale: Sale }> = (props) => {
         display="flex"
         alignItems="center"
       >
-        {selectedLot && <LotView lot={selectedLot} />}
+        {selectedLot && (
+          <LotView buyersPremium={sale?.buyersPremium} lot={selectedLot} />
+        )}
       </Column>
 
       <Column span={3}>
-        <LotInfo lot={selectedLot} />
-        <BorderBox
-          flexDirection="column"
-          alignItems="center"
-          borderRadius={0}
-          borderX="none"
-        >
-          <Button disabled>REGISTRATION CLOSED</Button>
-          <Text variant="small" color="black60" mt={1}>
-            Already registered for this sale?{' '}
-            <Link href="/login">
-              <LinkContent>Log In</LinkContent>
-            </Link>
-          </Text>
-        </BorderBox>
+        <LotInfo lot={selectedLot} buyersPremium={sale?.buyersPremium} />
+        <BidRegistration
+          currency={selectedLot?.currency}
+          hasEnded={sale?.isClosed}
+        />
       </Column>
     </GridColumns>
   )
 }
 
-const LinkContent = styled(HyperLink)`
-  cursor: pointer;
-`
-
 export const getStaticProps = async ({ params: { id } }) => {
-  console.log('GSP')
   try {
     const res = await metaphysicsFetcher({
       query: graphqlQuery,
       variables: { SaleId: id },
       xappToken: process.env.NEXT_PUBLIC_ARTSY_XAPP_TOKEN,
     })
-    console.log(res.sale)
-    // TODO: delete this once connection is working right
+
     return {
       props: {
-        sale: { ...res.sale },
-
-        // auction,
+        sale: res.sale,
       },
       // Next.js will attempt to re-generate the page:
       // - When a request comes in

@@ -1,41 +1,53 @@
 // NOTE: These are for dev purposes only
 // TODO: Replace with actual types
-
+interface Increment {
+  cents: number
+  display: string
+}
 export interface Lot {
-  internalID: string
-  lotLabel: string
-  artist: { name: string }
   artwork: {
-    title: string
+    artist: { name: string }
     date: string
-    medium: string
     dimensions: {
-      in: string
       cm: string
+      in: string
     }
     image: { url: string }
+    medium: string
+    title: string
   }
+  bidCount: number
+  currency: string
   currentBid: string
-  lowEstimate: {
-    cents: string
-  }
+  estimate: string
   highEstimate: {
     cents: string
   }
+  increments: Array<Increment>
+  internalID: string
+  lotLabel: string
+  lowEstimate: {
+    cents: string
+  }
   symbol: string
-  bidCount: number
 }
 
 interface EdgeLike<T> {
   node: T
 }
 
+interface Premium {
+  amount: string
+  percent: number
+}
+
 export interface Sale {
+  buyersPremium: [Premium, Premium] | null
   internalID: string
+  isClosed: boolean
   slug: string
   name: string
   saleArtworksConnection: {
     edges: Array<EdgeLike<Lot>>
   }
-  fakeLots?: Array<Lot>
 }

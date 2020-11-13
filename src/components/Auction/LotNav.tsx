@@ -13,7 +13,7 @@ interface Props {
 export const LotNav: React.FC<Props> = ({ lot, saleSlug }) => {
   if (!lot) return null
   const router = useRouter()
-  let active = router.query.lot === lot.internalID
+  const active = router.query.lot === lot.internalID
   return (
     <Link href={`/auctions/${saleSlug}?lot=${lot.internalID}`}>
       <FlexLink
@@ -33,7 +33,7 @@ export const LotNav: React.FC<Props> = ({ lot, saleSlug }) => {
         </Box>
         <Flex flexDirection="column" color={active ? 'black100' : 'black60'}>
           <Text variant="mediumText">LOT {lot.lotLabel}</Text>
-          <Text variant="mediumText">{lot?.artist?.name}</Text>
+          <Text variant="mediumText">{lot.artwork.artist?.name}</Text>
         </Flex>
       </FlexLink>
     </Link>

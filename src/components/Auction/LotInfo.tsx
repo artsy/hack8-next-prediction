@@ -3,37 +3,40 @@ import { BorderBox, Box, Flex, Text, Tooltip } from '@artsy/palette'
 
 import { PaddleIcon } from '../Icons'
 
-import { Lot } from '../Types'
+import { Lot, Sale } from '../Types'
 interface Props {
   lot: Lot
+  buyersPremium: Sale['buyersPremium']
 }
 
 interface DetailsProps extends Props {
   includeEstimates?: boolean
-  condensed?: boolean
+  // condensed?: boolean //to be used in the future to show/hide extra info
 }
 
 export const LotDetails: React.FC<DetailsProps> = ({
   lot,
-  condensed,
+  // condensed,
   includeEstimates,
+  buyersPremium,
 }) => {
-  const { artwork, symbol } = lot
+  const { artist, title, date, medium, dimensions } = lot.artwork
+  const premiumPrice = buyersPremium && buyersPremium[1].amount
   return (
     <Box>
       <Box>
-        <Text variant="mediumText">{lot?.artist?.name}</Text>
+        <Text variant="mediumText">{artist?.name}</Text>
         <Text variant="text" color="black60">
-          {artwork.title}, {artwork.date}
+          {title}, {date}
         </Text>
         <Text variant="text" color="black60">
-          {artwork.medium}
+          {medium}
         </Text>
         <Text variant="text" color="black60">
-          {artwork.dimensions.in} in
+          {dimensions.in}
         </Text>
         <Text variant="text" color="black60">
-          {artwork.dimensions.cm} cm
+          {dimensions.cm}
         </Text>
       </Box>
       {includeEstimates && (
@@ -47,46 +50,50 @@ export const LotDetails: React.FC<DetailsProps> = ({
           borderX="none"
         >
           <Text variant="text">Estimate:</Text>
-          <Text variant="text">
-            {symbol}
-            {lot.lowEstimate.cents}–{symbol}
-            {lot.highEstimate.cents}
-          </Text>
+          <Text variant="text">{lot.estimate}</Text>
         </BorderBox>
       )}
-      <Box mt={1}>
-        <Text variant="text">
-          <Tooltip
-            content={
-              <>
-                <Text>
-                  On the hammer price up to and including USD200,000: 25
-                </Text>
-                <Text>
-                  On the portion of the hammer price in excess of USD200,000:
-                  20%
-                </Text>
-              </>
-            }
-          >
-            <Text variant="text" color="black60">
-              This work has a <b>Buyer’s Premium</b>
-            </Text>
-          </Tooltip>
-        </Text>
-      </Box>
+      {!!buyersPremium && (
+        <Box mt={1}>
+          <Text variant="text">
+            <Tooltip
+              content={
+                <>
+                  <Text>
+                    On the hammer price up to and including {premiumPrice}:{' '}
+                    {buyersPremium[0].percent * 100}%.
+                  </Text>
+                  <Text>
+                    On the portion of the hammer price in excess of{' '}
+                    {premiumPrice}: {buyersPremium[1].percent * 100}%.
+                  </Text>
+                </>
+              }
+            >
+              <Text variant="text" color="black60">
+                This work has a <b>Buyer’s Premium</b>
+              </Text>
+            </Tooltip>
+          </Text>
+        </Box>
+      )}
     </Box>
   )
 }
 
-export const LotInfo: React.FC<Props> = ({ lot }) => {
+export const LotInfo: React.FC<Props> = ({ lot, buyersPremium }) => {
   if (!lot) return null
   return (
     <Box p={3}>
       <Text variant="mediumText" mb={3}>
         LOT {lot.lotLabel}
       </Text>
-      <LotDetails lot={lot} condensed={true} includeEstimates={true} />
+      <LotDetails
+        lot={lot}
+        buyersPremium={buyersPremium}
+        /*condensed={true}*/
+        includeEstimates={true}
+      />
       <Flex justifyContent="space-between" mt={3}>
         <Flex>
           <PaddleIcon />
