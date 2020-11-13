@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { color, Column, Flex, GridColumns, Spinner, Text } from '@artsy/palette'
-import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import { color, Column, Flex, GridColumns, Spinner } from '@artsy/palette'
+import { metaphysicsFetcher } from 'lib/metaphysics'
 import { graphql } from 'react-relay'
 import { useQuery } from 'relay-hooks'
 
@@ -109,7 +109,9 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
     auctionData?.lotStandingConnection?.edges?.map(({ node }) => node) || []
 
   const lotStates: any[] = auctionData.lots || []
-  const findLotState = (id: string) => lotStates.find((l) => l.id === id)
+
+  // never got around to using this for showing lot state in right column etc
+  const _findLotState = (id: string) => lotStates.find((l) => l.id === id)
 
   const isActive =
     router.query.lot === currentLot?.internalID || !router.query.lot
@@ -174,7 +176,7 @@ export const getStaticProps = async ({ params: { id } }) => {
       // Next.js will attempt to re-generate the page:
       // - When a request comes in
       // - At most once every second
-      revalidate: 60, // In seconds
+      revalidate: 600, // In seconds
       // notFound: !res.status(200)
     }
   } catch (error) {

@@ -2,7 +2,7 @@ import { Flex, Text, Join, Separator } from '@artsy/palette'
 import { Layout } from 'components/Layout'
 import Head from 'next/head'
 
-import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+import { metaphysicsFetcher } from 'lib/metaphysics'
 
 import { AuctionLink } from 'components/AuctionLink'
 import { Auction } from 'components/Types'
