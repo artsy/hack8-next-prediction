@@ -53,9 +53,16 @@ import {
 const lotIdx = 1
 
 import { Sale } from 'components/Types'
+import { useUser } from 'lib/auth/hooks'
 
 const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
   const router = useRouter()
+  const user =
+    useUser({
+      redirectTo: `/login?redirectTo=${encodeURIComponent(router.asPath)}`,
+    }) || {}
+
+  const { userId } = user
 
   const lots =
     sale?.saleArtworksConnection?.edges?.map(({ node }) => node) || []
@@ -72,7 +79,7 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
     auctionDataQuery,
     {
       saleId: sale?.internalID,
-      userId: 'throwaway value',
+      userId,
     }
   )
 

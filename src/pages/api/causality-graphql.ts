@@ -66,8 +66,7 @@ export default async function causalityGraphql(
         },
         body: JSON.stringify({
           query,
-          // hack: shove userId in from session
-          variables: { ...variables, userId: session.userId },
+          variables,
         }),
       }
     )
