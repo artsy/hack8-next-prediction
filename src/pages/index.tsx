@@ -1,6 +1,14 @@
-import { Box, Text } from '@artsy/palette'
+import { Flex, Text, Join, Separator } from '@artsy/palette'
 import { Layout } from 'components/Layout'
 import Head from 'next/head'
+
+import { AuctionLink } from "components/AuctionLink"
+
+const auctions = [
+  { slug: 'gyhsbkjnlk', name: "Rago Auctions: Post War + Contemporary Art", status: "Live Bidding Open", coverImage: { url: "https://via.placeholder.com/50/0000FF" } },
+  { slug: 'gyhslk', name: "Heritage: Urban Art", status: "Live Bidding Open", coverImage: { url: "https://via.placeholder.com/50/0FBEEF" } },
+  { slug: 'gjnlk', name: "Next Prediction Test", status: "Live Bidding Open", coverImage: { url: "https://via.placeholder.com/50/0FBEEF" } }
+]
 
 export const Home = (): JSX.Element => {
   return (
@@ -11,53 +19,17 @@ export const Home = (): JSX.Element => {
       </Head>
 
       <main>
-        <Text as="h1" variant="heading" className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </Text>
-
-        <p className="description">
-          Get started by editing <code>pages/index.tsx</code>
-        </p>
-
-        <button
-          onClick={() => {
-            window.alert('With typescript and Jest')
-          }}
-        >
-          Test Button
-        </button>
-
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        <Flex flexDirection="column" maxWidth="800px" m={[0, "auto"]}>
+          <Text variant="title" mb={2}>Current Live Auctions</Text>
+          <Separator />
+          <Join separator={<Separator />}>
+            { auctions.map(auction => <AuctionLink auction={auction} />) }
+          </Join>
+          <Separator />
+        </Flex>
       </main>
     </Layout>
   )
 }
+
 export default Home
