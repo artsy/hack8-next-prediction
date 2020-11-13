@@ -7,15 +7,37 @@ import { Lot, Sale } from '../Types'
 interface Props {
   lots: Array<Lot>
   saleSlug: Sale['slug']
+  lotStandings: Array<{
+    id: string
+    isHighestBidder: boolean
+    leadingBidAmount: { displayAmount: string }
+    lotState: { internalID: string }
+  }>
 }
 
-export const LotsList: React.FC<Props> = ({ lots, saleSlug }) => {
-  const [upcomingActive, setUpcomingActive] = useState(true)
+export const LotsList: React.FC<Props> = ({ lots, saleSlug, lotStandings }) => {
+  const [filter, setFilter] = useState<'UPCOMING' | 'PREVIOUS' | 'BIDS'>(
+    'UPCOMING'
+  )
   const [visibleLots, setVisibleLots] = useState(lots)
+  const lotStandingIds = lotStandings.map((ls) => ls.lotState.internalID)
 
   useEffect(() => {
-    setVisibleLots(upcomingActive ? lots : [])
-  }, [upcomingActive, lots])
+    switch (filter) {
+      case 'UPCOMING':
+        setVisibleLots(lots)
+        break
+      case 'PREVIOUS':
+        setVisibleLots([])
+        break
+      case 'BIDS':
+        console.log({ lotStandingIds, ids: lots.map((l) => l.internalID) })
+        setVisibleLots(
+          lots.filter((l) => lotStandingIds.includes(l.internalID))
+        )
+        break
+    }
+  }, [filter, lots])
 
   return (
     <>
@@ -30,11 +52,11 @@ export const LotsList: React.FC<Props> = ({ lots, saleSlug }) => {
           <Link
             href="#"
             underlineBehavior="none"
-            color={upcomingActive ? 'purple100' : 'black60'}
+            color={filter ? 'purple100' : 'black60'}
             hoverColor="purple100"
             mx={0.5}
             onClick={() => {
-              setUpcomingActive(true)
+              setFilter('UPCOMING')
             }}
           >
             <Text variant="mediumText">UPCOMING</Text>
@@ -42,14 +64,26 @@ export const LotsList: React.FC<Props> = ({ lots, saleSlug }) => {
           <Link
             href="#"
             underlineBehavior="none"
-            color={!upcomingActive ? 'purple100' : 'black60'}
+            color={!filter ? 'purple100' : 'black60'}
             hoverColor="purple100"
             mx={0.5}
             onClick={() => {
-              setUpcomingActive(false)
+              setFilter('PREVIOUS')
             }}
           >
             <Text variant="mediumText">PREVIOUS</Text>
+          </Link>
+          <Link
+            href="#"
+            underlineBehavior="none"
+            color={!filter ? 'purple100' : 'black60'}
+            hoverColor="purple100"
+            mx={0.5}
+            onClick={() => {
+              setFilter('BIDS')
+            }}
+          >
+            <Text variant="mediumText">BIDS</Text>
           </Link>
         </Flex>
       </BorderBox>

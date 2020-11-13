@@ -30,8 +30,6 @@ export function useUser(options?: UseUserOptions) {
 
   const { redirectTo, redirectIfFound } = { ...defaults, ...options }
 
-  console.log({ redirectTo })
-
   const { data, error } = useSWR('/api/user', userFetcher)
 
   const user = data?.user
@@ -39,7 +37,6 @@ export function useUser(options?: UseUserOptions) {
   const hasUser = Boolean(user)
 
   useEffect(() => {
-    console.log({ redirectTo, redirectIfFound, finished, hasUser })
     if (!redirectTo || !finished) return
     if (
       // If redirectTo is set, redirect if the user was not found.
@@ -47,7 +44,6 @@ export function useUser(options?: UseUserOptions) {
       // If redirectIfFound is also set, redirect if the user was found
       (redirectIfFound && hasUser)
     ) {
-      console.warn('LOGGED IN, REDIRECTING TO ' + redirectTo)
       Router.push(redirectTo)
     }
   }, [redirectTo, redirectIfFound, finished, hasUser])

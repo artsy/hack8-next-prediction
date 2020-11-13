@@ -10,35 +10,38 @@ const auctionDataQuery = graphql`
     lotStandingConnection(userId: $userId) {
       edges {
         node {
-          lotState {
-            bidCount
-          }
-          id
           isHighestBidder
+          leadingBidAmount {
+            displayAmount
+          }
+          lotState {
+            internalID
+          }
         }
       }
     }
     sale(id: $saleId) {
       lots {
         id
+        bidCount
       }
     }
   }
 `
 
-const Debug = ({ value }): JSX.Element => (
-  <Flex
-    position="absolute"
-    borderRadius={4}
-    style={{ overflow: 'scroll' }}
-    px={1}
-    bg="black10"
-  >
-    <Text height="300px" as="pre" fontFamily="courier">
-      {JSON.stringify(value, null, 2)}
-    </Text>
-  </Flex>
-)
+// const Debug = ({ value }): JSX.Element => (
+//   <Flex
+//     position="absolute"
+//     borderRadius={4}
+//     style={{ overflow: 'scroll' }}
+//     px={1}
+//     bg="black10"
+//   >
+//     <Text height="300px" as="pre" fontFamily="courier">
+//       {JSON.stringify(value, null, 2)}
+//     </Text>
+//   </Flex>
+// )
 
 import {
   BidRegistration,
@@ -66,6 +69,7 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
 
   const lots =
     sale?.saleArtworksConnection?.edges?.map(({ node }) => node) || []
+
   const currentLot = lots[0] || null
   const [selectedLot, setSelectedLot] = useState(currentLot)
 
@@ -75,7 +79,7 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
     if (!selectedLot || !router.query.lot) setSelectedLot(currentLot)
   }, [router.query.lot, lots])
 
-  const { error: auctionDataError, props: auctionData } = useQuery(
+  const { error: auctionDataError, props: auctionData } = useQuery<any>(
     auctionDataQuery,
     {
       saleId: sale?.internalID,
@@ -84,12 +88,15 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
   )
 
   if (auctionDataError) {
-    console.error({ auctionDataError })
+    // some errors will happen because we shouldn't call api until the data is present 🤷‍♂️ but thats ok
+
+    console.warn(auctionDataError)
   }
 
   // If the page is not yet generated, this will be displayed
   // initially until getStaticProps() finishes running
-  if (router.isFallback || !auctionData) {
+  const isLoading = router.isFallback || !auctionData
+  if (isLoading) {
     return (
       <Flex height="100%" justifyContent="center" alignItems="center">
         <Spinner size="large" />
@@ -98,6 +105,11 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
   }
 
   console.warn({ auctionData })
+  const lotStandings =
+    auctionData?.lotStandingConnection?.edges?.map(({ node }) => node) || []
+
+  const lotStates: any[] = auctionData.lots || []
+  const findLotState = (id: string) => lotStates.find((l) => l.id === id)
 
   const isActive =
     router.query.lot === currentLot?.internalID || !router.query.lot
@@ -109,11 +121,16 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
         {currentLot && (
           <CurrentLotCard
             currentLot={currentLot}
+            //
             isActive={isActive}
             saleSlug={sale?.slug}
           />
         )}
-        <LotsList lots={lots} saleSlug={sale?.slug} />
+        <LotsList
+          lots={lots}
+          saleSlug={sale?.slug}
+          lotStandings={lotStandings}
+        />
       </Column>
 
       <Column
