@@ -1,4 +1,7 @@
 {
   "presets": ["next/babel"],
-  "plugins": [["relay", { "artifactDirectory": "./gql/__generated__" }],"inline-react-svg"]
+  "plugins": [
+    ["relay", { "artifactDirectory": "./gql/__generated__" }],
+    "inline-react-svg"
+  ]
 }

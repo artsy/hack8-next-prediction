@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { UserSessionData } from '../../lib/auth/user'
 import { getTokenCookie } from '../../lib/auth/cookies'
 import { decryptSession } from '../../lib/auth/session-encryption'
+import { metaphysicsFetcher } from 'lib/metaphysics'
 
 export default async function causalityGraphql(
   req: NextApiRequest,
@@ -11,58 +12,28 @@ export default async function causalityGraphql(
   const session: UserSessionData = cookie && (await decryptSession(cookie))
 
   const { query, variables = {} } = req.body
-  console.log(variables)
-  const { saleId } = variables
-  let jwt = 'badjwt'
+
   let response = {}
-
-  if (!saleId) {
-    return res.status(400).json({ error: 'saleId variable required' })
-  }
-
-  // we need an anonymous causality jwt or we can't show this
-  if (!session?.accessToken) {
-    return res
-      .status(400)
-      .json({ error: 'you must be logged in to see auction state' })
-  }
-
-  // fetch user jwt from metaphysics v1
   try {
-    console.log('fetching jwt...')
-    const metaphysicsRes = await fetch(
-      `${process.env.NEXT_PUBLIC_METAPHYSICS_URL}`,
-      {
-        method: 'post',
-        headers: {
-          'content-type': 'application/json',
-          'x-access-token': session.accessToken,
-        },
-        body: JSON.stringify({
-          query: `{ jwt: causality_jwt(sale_id: "${saleId}", role: PARTICIPANT) }`,
-        }),
-      }
-    )
-    const jwtRes = await metaphysicsRes.json()
-    if (jwtRes.errors) {
-      console.error(jwtRes.errors)
+    // we need an anonymous causality jwt or we can't show this
+    if (!variables?.saleId) {
+      throw new Error('missing saleId')
     }
-    console.warn({ jwtRes })
-    jwt = jwtRes.data.jwt
-  } catch (e) {
-    console.error('metaphysics jwt fetching error', e)
-    res.status(569)
-  }
+    if (!session?.accessToken) {
+      throw new Error('you must be logged in to see auction state')
+    }
+    const causalityJwt = await getCausalityJwt({
+      accessToken: session.accessToken,
+      saleId: variables.saleId,
+    })
 
-  try {
-    console.log('calling causality ...')
     const causalityRes = await fetch(
       `${process.env.NEXT_PUBLIC_CAUSALITY_URL}/graphql`,
       {
         method: 'post',
         headers: {
           'content-type': 'application/json',
-          Authorization: `Bearer ${jwt}`,
+          Authorization: `Bearer ${causalityJwt}`,
         },
         body: JSON.stringify({
           query,
@@ -71,10 +42,33 @@ export default async function causalityGraphql(
       }
     )
     response = await causalityRes.json()
+
+    return res.status(200).json(response)
   } catch (e) {
     console.error('causality fetching error', e)
-    res.status(569)
+    return res.status(200).json({ data: null, errors: [JSON.stringify(e)] })
   }
+}
 
-  res.status(200).json(response)
+const getCausalityJwt = async ({
+  accessToken,
+  saleId = 'ipcny-benefit-auction-2020',
+}: {
+  accessToken: string
+  saleId?: string
+}): Promise<string | null | undefined> => {
+  try {
+    const metaphysicsRes = await metaphysicsFetcher({
+      accessToken,
+      xappToken: process.env.NEXT_PUBLIC_ARTSY_XAPP_TOKEN,
+      v1: true,
+      // v1 causality_jwt requires a sale_id even though we
+      query: `{ jwt: causality_jwt(sale_id: "${saleId}", role: PARTICIPANT) }`,
+      variables: {},
+    })
+    return metaphysicsRes?.jwt
+  } catch (e) {
+    console.error('metaphysics jwt fetching error', e)
+  }
+  return null
 }
