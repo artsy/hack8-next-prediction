@@ -1,10 +1,17 @@
+import { useRouter } from 'next/router'
 import { useState, FormEvent } from 'react'
 import { useUser } from '../lib/auth/hooks'
 
 const TWO_FACTOR_MISSING_RESPONSE = 'missing two-factor'
 
 const Login = () => {
-  const user = useUser({ redirectIfFound: true, redirectTo: '/' })
+  const {
+    query: { redirectTo = '/' },
+  } = useRouter()
+  const user = useUser({
+    redirectIfFound: true,
+    redirectTo: '/',
+  })
 
   const [errorMsg, setErrorMsg] = useState('')
   const [isTwoFactorEnabled, setTwoFactorEnabled] = useState(false)
@@ -28,7 +35,7 @@ const Login = () => {
         body: JSON.stringify(body),
       })
       if (res.status === 200) {
-        window.location.href = '/'
+        window.location.href = redirectTo as string
       } else {
         throw new Error(await res.text())
       }

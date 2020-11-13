@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 export interface UserSessionData {
+  userId: string
   email: string
   roles: string[]
   labFeatures: string[]
@@ -10,10 +11,12 @@ export interface UserSessionData {
 export async function findUser({ username, password, otp }) {
   const accessToken = await getGravityAccessToken({ username, password, otp })
   const userProfile = await getUserProfile(accessToken)
+  // const causalityJwt = await getCausalityJwt(accessToken)
 
   return {
     ...userProfile,
     accessToken,
+    // causalityJwt,
   }
 }
 
@@ -57,9 +60,10 @@ const getUserProfile = async (accessToken) => {
   })
 
   const user = await response.json()
-  const { email, roles, lab_features, last_sign_in_at } = user
+  const { id, email, roles, lab_features, last_sign_in_at } = user
 
   return {
+    userId: id,
     email,
     roles,
     labFeatures: lab_features,
