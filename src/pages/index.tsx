@@ -7,7 +7,7 @@ import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
 import { AuctionLink } from 'components/AuctionLink'
 import { Auction } from 'components/Types'
 
-export const Home: React.FC<{ auctions: Array<Auction> }> = ({
+export const Home: React.FC<{ auctions?: Array<Auction> }> = ({
   auctions,
 }): JSX.Element => {
   return (
