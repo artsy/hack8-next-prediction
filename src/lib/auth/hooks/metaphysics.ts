@@ -1,36 +1,56 @@
 import useSWR from 'swr'
 import { useUser } from './user'
 
-export const metaphysicsFetcher = async (
-  query: string,
+export const metaphysicsFetcher = async ({
+  query,
+  variables = {},
+  accessToken,
+  xappToken,
+}: {
+  query: string
   // eslint-disable-next-line @typescript-eslint/no-inferrable-types
-  variableJSON: string = '{}',
+  variables: object
   accessToken?: string
-) => {
+  xappToken?: string
+}) => {
   const url = `${process.env.NEXT_PUBLIC_METAPHYSICS_URL}/v2`
-  const variables = JSON.parse(variableJSON)
+  // console.log({ variables, xappToken })
 
+  const headers = {
+    'Content-Type': 'application/json',
+  }
+  if (accessToken) {
+    headers['X-Access-Token'] = accessToken
+  }
+  if (accessToken) {
+    headers['X-xapp-Token'] = xappToken
+  }
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Access-Token': accessToken,
-    },
+    headers,
     body: JSON.stringify({ query, variables }),
   })
 
   if (!response.ok) {
-    console.log(response)
     throw new Error(response.statusText || response.status.toString())
   }
 
   const json = await response.json()
   const { data, errors } = json // TODO: errors
-
+  if (errors) {
+    // console.error(errors)
+    throw new Error(JSON.stringify(errors))
+  }
   return data
 }
 
-export const useMetaphysics = (query: string, variables: object = {}) => {
+export const useMetaphysics = ({
+  query,
+  variables = {},
+}: {
+  query: string
+  variables: object
+}) => {
   const user = useUser()
   const { data, error } = useSWR(
     user ? [query, JSON.stringify(variables), user.accessToken] : null,

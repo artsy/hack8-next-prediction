@@ -1,4 +1,4 @@
-import { Box, Text } from '@artsy/palette'
+import { Text } from '@artsy/palette'
 import { Layout } from 'components/Layout'
 import Head from 'next/head'
 
