@@ -36,7 +36,8 @@ export const LotView: React.FC<Props> = ({ lot, buyersPremium }) => {
       alignItems="center"
       flexDirection="column"
       flex={1}
-      alignSelf={mainView ? 'auto' : 'baseline'}
+      justifyContent={mainView ? 'center' : 'baseline'}
+      width="100%"
     >
       {mainView && (
         <>
