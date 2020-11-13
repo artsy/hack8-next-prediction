@@ -6,14 +6,16 @@ export const metaphysicsFetcher = async ({
   variables = {},
   accessToken,
   xappToken,
+  v1,
 }: {
   query: string
   // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   variables: object
   accessToken?: string
   xappToken?: string
+  v1?: boolean
 }) => {
-  const url = `${process.env.NEXT_PUBLIC_METAPHYSICS_URL}/v2`
+  const url = `${process.env.NEXT_PUBLIC_METAPHYSICS_URL}${v1 ? '' : '/v2'}`
   // console.log({ variables, xappToken })
 
   const headers = {

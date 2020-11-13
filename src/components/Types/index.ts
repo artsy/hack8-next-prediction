@@ -1,9 +1,19 @@
 // NOTE: These are for dev purposes only
 // TODO: Replace with actual types
+export interface Auction {
+  slug: string
+  name: string
+  isLiveOpen: boolean
+  coverImage?: {
+    url: string
+  }
+}
+
 interface Increment {
   cents: number
   display: string
 }
+
 export interface Lot {
   artwork: {
     artist: { name: string }
@@ -12,7 +22,11 @@ export interface Lot {
       cm: string
       in: string
     }
-    image: { url: string }
+    image: {
+      url: string
+      height: number
+      width: number
+    }
     medium: string
     title: string
   }

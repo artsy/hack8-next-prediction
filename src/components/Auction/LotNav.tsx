@@ -23,12 +23,13 @@ export const LotNav: React.FC<Props> = ({ lot, saleSlug }) => {
         flexDirection="row"
       >
         <Box>
-          <Image
+          <Img
             height="50px"
             width="50px"
             lazyLoad
             src={lot.artwork.image.url}
             mr={3}
+            preventRightClick
           />
         </Box>
         <Flex flexDirection="column" color={active ? 'black100' : 'black60'}>
@@ -44,5 +45,11 @@ const FlexLink = styled(Flex)`
   cursor: pointer;
   &:hover {
     background-color: ${color('black5')};
+  }
+`
+
+const Img = styled(Image)`
+  img {
+    object-fit: cover;
   }
 `

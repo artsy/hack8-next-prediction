@@ -41,13 +41,14 @@ export const LotView: React.FC<Props> = ({ lot, buyersPremium }) => {
       {mainView && (
         <>
           <ResponsiveBox
-            aspectWidth={500}
-            aspectHeight={500}
-            maxWidth="100%"
+            aspectWidth={lot.artwork.image.width}
+            aspectHeight={lot.artwork.image.height}
+            maxHeight={600}
             bg="black5"
           >
             <Image
               height="100%"
+              width="auto"
               src="https://picsum.photos/seed/hello/700/400"
               srcSet={artworkSrc}
               alt="Please make sure you describe the image"
@@ -69,9 +70,8 @@ export const LotView: React.FC<Props> = ({ lot, buyersPremium }) => {
         <>
           <Flex justifyContent="space-between" width="100%">
             <Flex alignItems="center">
-              <Image
+              <Img
                 height="130px"
-                width="130px"
                 src="https://picsum.photos/seed/hello/700/400"
                 srcSet={artworkSrc}
                 alt="Please make sure you describe the image"
@@ -114,4 +114,10 @@ const StyledLink = styled(Link)`
   align-items: center;
   flex-direction: row;
   display: flex;
+`
+
+const Img = styled(Image)`
+  img {
+    width: auto;
+  }
 `

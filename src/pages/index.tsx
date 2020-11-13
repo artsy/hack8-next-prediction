@@ -1,8 +1,15 @@
-import { Text } from '@artsy/palette'
+import { Flex, Text, Join, Separator } from '@artsy/palette'
 import { Layout } from 'components/Layout'
 import Head from 'next/head'
 
-export const Home = (): JSX.Element => {
+import { metaphysicsFetcher } from 'lib/auth/hooks/metaphysics'
+
+import { AuctionLink } from 'components/AuctionLink'
+import { Auction } from 'components/Types'
+
+export const Home: React.FC<{ auctions?: Array<Auction> }> = ({
+  auctions,
+}): JSX.Element => {
   return (
     <Layout>
       <Head>
@@ -11,53 +18,58 @@ export const Home = (): JSX.Element => {
       </Head>
 
       <main>
-        <Text as="h1" variant="heading" className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </Text>
-
-        <p className="description">
-          Get started by editing <code>pages/index.tsx</code>
-        </p>
-
-        <button
-          onClick={() => {
-            window.alert('With typescript and Jest')
-          }}
-        >
-          Test Button
-        </button>
-
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        <Flex flexDirection="column" maxWidth="800px" m={[0, 'auto']}>
+          <Text variant="title" mb={2}>
+            Current Live Auctions
+          </Text>
+          <Separator />
+          <Join separator={<Separator />}>
+            {auctions?.map((auction) => (
+              <AuctionLink key={auction.slug} auction={auction} />
+            ))}
+          </Join>
+          <Separator />
+        </Flex>
       </main>
     </Layout>
   )
 }
+
+export const getStaticProps = async () => {
+  try {
+    const res = await metaphysicsFetcher({
+      query,
+      variables: {},
+      xappToken: process.env.NEXT_PUBLIC_ARTSY_XAPP_TOKEN,
+      v1: true,
+    })
+    return {
+      props: { auctions: res.auctions },
+      // Next.js will attempt to re-generate the page:
+      // - When a request comes in
+      // - At most once every second
+      revalidate: 60, // In seconds
+      // notFound: !res.status(200)
+    }
+  } catch (error) {
+    console.error(error)
+    return {
+      notFound: true,
+    }
+  }
+}
+
+const query = `
+  query {
+    auctions: sales(is_auction: true, sort: CREATED_AT_ASC, size: 7) {
+      slug: id
+      name
+      isLiveOpen: is_live_open
+      coverImage: cover_image {
+        url
+      }
+    }
+  }
+`
+
 export default Home
