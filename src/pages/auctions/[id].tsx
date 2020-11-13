@@ -6,7 +6,18 @@ import { graphql } from 'react-relay'
 import { useQuery } from 'relay-hooks'
 
 const auctionDataQuery = graphql`
-  query Id_auctionDataQuery($saleId: ID!) {
+  query Id_auctionDataQuery($saleId: ID!, $userId: ID!) {
+    lotStandingConnection(userId: $userId) {
+      edges {
+        node {
+          lotState {
+            bidCount
+          }
+          id
+          isHighestBidder
+        }
+      }
+    }
     sale(id: $saleId) {
       lots {
         id
@@ -16,7 +27,13 @@ const auctionDataQuery = graphql`
 `
 
 const Debug = ({ value }): JSX.Element => (
-  <Flex borderRadius={4} style={{ overflow: 'scroll' }} px={1} bg="black10">
+  <Flex
+    position="absolute"
+    borderRadius={4}
+    style={{ overflow: 'scroll' }}
+    px={1}
+    bg="black10"
+  >
     <Text height="300px" as="pre" fontFamily="courier">
       {JSON.stringify(value, null, 2)}
     </Text>
@@ -51,10 +68,17 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
     if (!selectedLot || !router.query.lot) setSelectedLot(currentLot)
   }, [router.query.lot, lots])
 
-  const { error, props: auctionData } = useQuery(auctionDataQuery, {
-    saleId: sale.internalID,
-  })
-  if (error) return <div>{error.message}</div>
+  const { error: auctionDataError, props: auctionData } = useQuery(
+    auctionDataQuery,
+    {
+      saleId: sale?.internalID,
+      userId: 'throwaway value',
+    }
+  )
+
+  if (auctionDataError) {
+    console.error({ auctionDataError })
+  }
 
   // If the page is not yet generated, this will be displayed
   // initially until getStaticProps() finishes running
@@ -65,6 +89,8 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
       </Flex>
     )
   }
+
+  console.warn({ auctionData })
 
   const isActive =
     router.query.lot === currentLot?.internalID || !router.query.lot
@@ -89,10 +115,13 @@ const Auction: React.FC<{ sale: Sale }> = ({ sale }) => {
         p={3}
         display="flex"
         alignItems="center"
+        flexDirection="column"
       >
         {selectedLot && (
           <LotView buyersPremium={sale?.buyersPremium} lot={selectedLot} />
         )}
+
+        {/* auctionData && <Debug value={auctionData} /> */}
       </Column>
 
       <Column span={3}>

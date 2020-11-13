@@ -22,11 +22,11 @@ export default {
 
       network: new RelayNetworkLayer([
         urlMiddleware({
-          url: `${process.env.NEXT_PUBLIC_CAUSALITY_URL}/graphql`,
+          url: `/api/causality-graphql`,
           method: 'POST',
           headers: {
             Authorization: `Bearer ${process.env.NEXT_PUBLIC_CAUSALITY_TEMP_JWT}`,
-            'content-type': 'application/json',
+            // 'content-type': 'application/json',
           },
         }),
         cacheMiddleware({

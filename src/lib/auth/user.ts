@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase */
 export interface UserSessionData {
+  userId: string
   email: string
   roles: string[]
   labFeatures: string[]
@@ -59,9 +60,10 @@ const getUserProfile = async (accessToken) => {
   })
 
   const user = await response.json()
-  const { email, roles, lab_features, last_sign_in_at } = user
+  const { id, email, roles, lab_features, last_sign_in_at } = user
 
   return {
+    userId: id,
     email,
     roles,
     labFeatures: lab_features,

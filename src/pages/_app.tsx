@@ -5,7 +5,6 @@ import { RelayEnvironmentProvider } from 'relay-hooks'
 import '../styles.css'
 
 export default function App({ Component, pageProps }) {
-  console.log({ pageProps })
   return (
     /* Our causality relay environment */
     /*

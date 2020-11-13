@@ -20,12 +20,12 @@ export default {
         store,
         network: new RelayNetworkLayer([
           urlMiddleware({
-            url: `${process.env.NEXT_PUBLIC_CAUSALITY_URL}/graphql`,
+            url: `/api/causality-graphql`,
             method: 'POST',
             headers: {
               // FIXME: This hard-coded admin jwt cannot be used on client, how to add it from the user? Set it in cookie with access token?
               Authorization: `Bearer ${process.env.NEXT_PUBLIC_CAUSALITY_TEMP_JWT}`,
-              'content-type': 'application/json',
+              // 'content-type': 'application/json',
             },
           }),
 
