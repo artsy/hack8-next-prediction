@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import styled from 'styled-components'
@@ -7,6 +7,7 @@ import {
   Button,
   color,
   Column,
+  Flex,
   GridColumns,
   Link as HyperLink,
   Text,
@@ -22,31 +23,36 @@ import {
 } from 'components/Auction'
 
 // These IS all for the sake of testing
-import { generateDummyData } from 'components/Auction/testData'
-const amt = 30
 const lotIdx = 1
-// const fakeLots: Array<Lot> = generateDummyData(amt)
 
-import { Lot, Sale } from 'components/Types'
+import { Sale } from 'components/Types'
 
 const Auction: React.FC<{ sale: Sale }> = (props) => {
-  console.log(!!props)
-  if (!props) return <h1>Loading...</h1>
+  const router = useRouter()
+
   const { sale } = props
-  // debugger
   const lots =
     sale?.saleArtworksConnection?.edges?.map(({ node }) => node) || []
-  const currentLot = lots[0]
-  const router = useRouter()
-  const active = router.query.lot === currentLot?.internalID
-
-  console.log({ lots })
+  const currentLot = lots[0] || null
   const [selectedLot, setSelectedLot] = useState(currentLot)
 
   useEffect(() => {
+    console.log('useeffect')
     const newLot = lots.find((lot) => router.query.lot === lot.internalID)
     if (newLot) setSelectedLot(newLot)
-  }, [router.query.lot])
+  }, [router.query.lot, lots])
+
+  // If the page is not yet generated, this will be displayed
+  // initially until getStaticProps() finishes running
+  if (router.isFallback) {
+    return (
+      <Flex height="100%" justifyContent="center" alignItems="center">
+        <pre>Loading...</pre>
+      </Flex>
+    )
+  }
+
+  const isActive = router.query.lot === currentLot?.internalID
 
   return (
     <GridColumns position="relative" gridColumnGap={0} height="100%">
@@ -55,7 +61,7 @@ const Auction: React.FC<{ sale: Sale }> = (props) => {
         {currentLot && (
           <CurrentLotCard
             currentLot={currentLot}
-            isActive={active}
+            isActive={isActive}
             saleSlug={sale?.slug}
           />
         )}
@@ -69,7 +75,7 @@ const Auction: React.FC<{ sale: Sale }> = (props) => {
         display="flex"
         alignItems="center"
       >
-        <LotView lot={selectedLot} />
+        {selectedLot && <LotView lot={selectedLot} />}
       </Column>
 
       <Column span={3}>
